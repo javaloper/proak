@@ -3,11 +3,11 @@
 // --------------------------------------------------
 LargeNumber::LargeNumber()
 {
-	this->numberOfDigits = 1;
+	this->numberOfDigits = 2;
 	this->decimalMarkPosition = 1;
 	this->isPositive = true;
-	this->digitsArray = new uint8_t[numberOfDigits] {0};
-
+	this->digitsArray = new uint8_t[numberOfDigits] {0, 0};
+	
 }
 LargeNumber::LargeNumber(unsigned int length)
 {
@@ -15,12 +15,14 @@ LargeNumber::LargeNumber(unsigned int length)
 	this->digitsArray = new uint8_t[numberOfDigits];
 	this->isPositive = true;
 }
-//Konstruktor tworzacy liczbe ze stringa, string dopuszcza minus na poczatku i kropke w dowolnym miejscu
+/*
+Konstruktor tworzacy liczbe ze stringa, string dopuszcza minud na poczatku i kropke w dowolnym miejscu
+*/
 LargeNumber::LargeNumber(string number)
 {
 	int stringCounter = 0;			// zmienna sluzaca do prawidlowego okreslenia dlugosci liczby pomijajac znaki minus i kropki
 	this->decimalMarkPosition = -1; // punkt przecinka nie jest jeszcze ustalony
-	/*
+	/* 
 	Sprawdzamy czy liczba jest dodatnia, czy ujemna.
 	*/
 	if (number[0] == '-')
@@ -39,15 +41,18 @@ LargeNumber::LargeNumber(string number)
 			++stringCounter;
 			break;
 		}
-	}
+	}	
 	// Tworzymy liczbê mniejsz¹ o ewentualny znak minusa lub kropki	.
 	this->numberOfDigits = number.length() - stringCounter;
 	this->digitsArray = new uint8_t[numberOfDigits];
 	// Jesli nie znalezlismy kropki, kropka jest na koncu liczby
 	if (decimalMarkPosition == -1)
 		decimalMarkPosition = numberOfDigits;
-	// jesli liczba jest ujemna liczby bedziemy zapisywac od drugiego znaku stringa (!true == 0, !false == 1)
-	stringCounter = !isPositive; 
+	// jesli liczba jest ujemna liczby bedziemy zapisywac od drugiego znaku stringa
+	if (!isPositive)
+		stringCounter = 1;
+	else
+		stringCounter = 0;
 	// Pierwsza petla przypisuje liczby do przecinka, druga od przecinka
 	for (int i = 0; i < decimalMarkPosition; i++)
 	{
@@ -90,7 +95,9 @@ LargeNumber::~LargeNumber()
 	delete[] digitsArray;
 }
 // --------------------------------------------------
-// Zapisywyanie do stringa
+/*
+Zapisywyanie do stringa
+*/
 string LargeNumber::ToString()
 {
 	string number;
@@ -112,7 +119,9 @@ string LargeNumber::ToString()
 	}
 	return number;
 }
-//Zwraca pozycje przecinka
+/*
+Zwraca pozycje przecinka
+*/
 unsigned int LargeNumber::GetDecimalMarkPosition()
 {
 	return decimalMarkPosition;
@@ -130,75 +139,10 @@ uint8_t LargeNumber::Digit(unsigned int position)
 	uint8_t res = digitsArray[position];
 	return res;
 }
-
-//Usuwanie zer
-uint8_t* LargeNumber::CutZeros(uint8_t *x)
-{
-	uint8_t newArray;
-
-	return x;
-	
-}
-uint8_t* LargeNumber::CutZerosRight(uint8_t *x, unsigned int &length, const unsigned int &markPoint)
-{
-	uint8_t *newArray;
-	unsigned int newLength = length;
-	int i;
-	// Usuwanie niepotrzebnych zer z prawej strony przecinka
-	for (i = length - 1; i >= markPoint; i--)
-	{
-		if (x[i] != 0)
-		{
-			break;
-		}
-		newLength--;
-	}
-	// Jesli wielkosc sie nie zmienila zwroc stary wskaznik
-	if (length == newLength)
-		return x;
-	
-	newArray = new uint8_t[newLength];
-	for (i = 0; i < newLength; i++)
-	{
-		newArray[i] = x[i];
-	}
-	length = newLength;
-	delete x;
-	x = newArray;
-	return x;
-}
-uint8_t* LargeNumber::CutZerosLeft(uint8_t *x, unsigned int &length, const unsigned int &markPoint)
-{
-	uint8_t *newArray;
-	unsigned int cut = 0;
-	int i;
-	// Usuwanie niepotrzebnych zer z prawej strony przecinka
-	for (i = 0; i < markPoint - 1 ; i--)
-	{
-		if (x[i] != 0)
-		{
-			break;
-		}
-		cut++;
-	}
-	// Jesli wielkosc sie nie zmienila zwroc stary wskaznik
-	if (cut == 0)
-		return x;
-
-	newArray = new uint8_t[length - cut];
-	for (i = 0; i < length - cut; i++)
-	{
-		newArray[i] = x[i + cut];
-	}
-	length = length - cut;
-	delete x;
-	x = newArray;
-	return x;
-}
 /*
-Operacja dodawania, gdy obie liczby sa tego samego znaku:
+Operacja dodawania, gdy obie liczby sa tego samego znaku: 
 dodawanie dwoch dodatnich, dodawanie dwoch ujemnych, odejmowanie, gdy jedna jest dodatnia
-+x + +y; -x + -y; -x - +y, +x - -y;
++x + +y; -x + -y; -x - +y, +x - -y; 
 */
 LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 {
@@ -214,8 +158,7 @@ LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 	unsigned int numberLength = 0;
 	// Pozycja przecinka nowej liczby
 	unsigned int decimalMark = 0;
-	// zmienna iteracyjna
-	int i;
+
 	//Dodajemy dluzsza pozycje przecinka do dlugosci liczby
 	if (XRightPart >= YRightPart)
 		numberLength += XRightPart;
@@ -237,12 +180,12 @@ LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 	// tworzenie nowej tablicy
 	arrayOfDigits = new uint8_t[numberLength];
 	// Zerowanie nowej tablicy
-	for (i = 0; i < numberLength; i++)
+	for (int i = 0; i < numberLength; i++)
 		arrayOfDigits[i] = 0;
 	// Przeniesienie
 	uint8_t carry = 0;
 	// Dodawanie liczb po przecinku
-	for (i = numberLength - 1; i >= decimalMark; i--)
+	for (int i = numberLength - 1; i >= decimalMark; i--)
 	{
 		--rightBorder;
 		// Sprawdzamy czy pozycja ktora chcemy dodac istnieje
@@ -266,18 +209,19 @@ LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 		}
 	}
 	// Dodawanie liczb po przecinku
-	for (i = decimalMark - 1; i >= 0; i--)
+	for (int i = decimalMark - 1; i >= 0; i--)
 	{
 		if (XLeftPart > 0)
 		{
-			--XLeftPart;
 			arrayOfDigits[i] += x.Digit(XLeftPart);
+			--XLeftPart;
 		}
 		if (YLeftPart > 0)
 		{
+			arrayOfDigits[i] += y.Digit(XLeftPart);
 			--YLeftPart;
-			arrayOfDigits[i] += y.Digit(YLeftPart);
 		}
+
 		// Dodajemy ewentualne przeniesienie
 		arrayOfDigits[i] += carry;
 		// Zerujemy przeniesienie
@@ -286,6 +230,7 @@ LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 		Sprawdzamy czy wartosc jest wieksza od podstawy (domyslnie 10, przy innych trzeba stworzyc template i zastapic 10
 		Jesli tak, to ustawiamy przeniesienie
 		*/
+
 		if (arrayOfDigits[i] > 9)
 		{
 			arrayOfDigits[i] -= 10;
@@ -293,15 +238,14 @@ LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 		}
 	}
 	// Dodajemy nowa cyfre na poczatku jesli mamy przeniesienie
-	uint8_t *newArrayOfDigits;	
 	if (carry == 1)
 	{
 		++numberLength;
 		++decimalMark;
-		newArrayOfDigits = new uint8_t[numberLength];
+		uint8_t *newArrayOfDigits = new uint8_t[numberLength];
 
 		newArrayOfDigits[0] = 1;
-		for (i = 1; i < numberLength; i++)
+		for (int i = 1; i < numberLength; i++)
 		{
 			newArrayOfDigits[i] = arrayOfDigits[i - 1];
 		}
@@ -310,9 +254,6 @@ LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 		arrayOfDigits = newArrayOfDigits;
 
 	}
-	// Usuwanie zer z konca
-	arrayOfDigits = CutZerosRight(arrayOfDigits, numberLength, decimalMark);
-
 	return LargeNumber(arrayOfDigits, numberLength, decimalMark, x.GetSign());
 }
 /*
@@ -321,17 +262,7 @@ Operacja odejmowania, wykonywana, gdy:
 */
 LargeNumber LargeNumber::Subtraction(LargeNumber &x, LargeNumber &y)
 {
-	return LargeNumber();
-}
-// Operacja mno¿enie
-LargeNumber LargeNumber::Multiplication(LargeNumber &x, LargeNumber &y)
-{
-	return LargeNumber();
-}
-// Operacja dzielenia
-LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y)
-{
-	return LargeNumber();
+	return NULL;
 }
 // --------------------------------------------------
 LargeNumber operator+ (LargeNumber &x, LargeNumber &y)
@@ -342,7 +273,7 @@ LargeNumber operator+ (LargeNumber &x, LargeNumber &y)
 	else
 		return LargeNumber().Subtraction(x, y);
 }
-LargeNumber operator- (LargeNumber &x, LargeNumber &y)
+LargeNumber operator- ( LargeNumber &x, LargeNumber &y)
 {
 
 	if (x.GetSign() ^ y.GetSign())
