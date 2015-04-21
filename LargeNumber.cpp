@@ -58,7 +58,9 @@ LargeNumber::LargeNumber(string number)
 	{
 		digitsArray[i] = number[i + stringCounter] - 48;
 	}
-
+	// Usuwamy nadmiarowe zera, jesli istnieja
+	this->digitsArray = CutZerosLeft(digitsArray, numberOfDigits, decimalMarkPosition);
+	this->digitsArray = CutZerosRight(digitsArray, numberOfDigits, decimalMarkPosition);
 }
 LargeNumber::LargeNumber(uint8_t* array, unsigned int length, unsigned int markPoint)
 {
@@ -131,14 +133,7 @@ uint8_t LargeNumber::Digit(unsigned int position)
 	return res;
 }
 
-//Usuwanie zer
-uint8_t* LargeNumber::CutZeros(uint8_t *x)
-{
-	uint8_t newArray;
-
-	return x;
-	
-}
+//Usuwanie zer z prawej strony przecinka
 uint8_t* LargeNumber::CutZerosRight(uint8_t *x, unsigned int &length, const unsigned int &markPoint)
 {
 	uint8_t *newArray;
@@ -167,13 +162,14 @@ uint8_t* LargeNumber::CutZerosRight(uint8_t *x, unsigned int &length, const unsi
 	x = newArray;
 	return x;
 }
-uint8_t* LargeNumber::CutZerosLeft(uint8_t *x, unsigned int &length, const unsigned int &markPoint)
+//Usuwanie zer z lewej strony przecinka
+uint8_t* LargeNumber::CutZerosLeft(uint8_t *x, unsigned int &length, unsigned int &markPoint)
 {
 	uint8_t *newArray;
 	unsigned int cut = 0;
 	int i;
 	// Usuwanie niepotrzebnych zer z prawej strony przecinka
-	for (i = 0; i < markPoint - 1 ; i--)
+	for (i = 0; i < markPoint - 1 ; i++)
 	{
 		if (x[i] != 0)
 		{
@@ -185,6 +181,7 @@ uint8_t* LargeNumber::CutZerosLeft(uint8_t *x, unsigned int &length, const unsig
 	if (cut == 0)
 		return x;
 
+	markPoint = markPoint - cut;
 	newArray = new uint8_t[length - cut];
 	for (i = 0; i < length - cut; i++)
 	{
@@ -202,7 +199,6 @@ dodawanie dwoch dodatnich, dodawanie dwoch ujemnych, odejmowanie, gdy jedna jest
 */
 LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 {
-	string result;
 	uint8_t *arrayOfDigits;
 	// Dlugosci liczb po przecinku x i y
 	unsigned int XRightPart = x.GetNumberOfDigits() - x.GetDecimalMarkPosition();
@@ -326,7 +322,47 @@ LargeNumber LargeNumber::Subtraction(LargeNumber &x, LargeNumber &y)
 // Operacja mno¿enie
 LargeNumber LargeNumber::Multiplication(LargeNumber &x, LargeNumber &y)
 {
-	return LargeNumber();
+	// inne zmienne
+	unsigned int xLen = x.GetNumberOfDigits();
+	unsigned int yLen = y.GetNumberOfDigits();
+	// Dlugosc jest maksymalna dlugoscia jaka moze powstac;
+	unsigned int numberLength = xLen + yLen;
+	
+	// Ustalenie dlugosci znaku
+	unsigned int decimalMark = numberLength - (numberLength - x.GetDecimalMarkPosition() - y.GetDecimalMarkPosition());
+	// inicjalizacja tablicy;
+	uint8_t *arrayOfDigits = new uint8_t[numberLength];
+	// Ustawienie znaku liczby
+	bool sign = !(x.GetSign() ^ y.GetSign());
+	// zmienne iteracyjna
+	int i, j, k = 1;
+	// Iteracyjna zmienna dlugosci
+	unsigned int iterLength = numberLength - k;
+	unsigned int carry; 
+	// zerowanie liczb
+	for (i = 0; i < numberLength; i++)
+		arrayOfDigits[i] = 0;
+	// Mno¿enie 
+	for (i = yLen - 1; i >= 0; i--)
+	{
+		for (j = xLen - 1; j >= 0; j--)
+		{
+			arrayOfDigits[iterLength] += (y.Digit(i) * x.Digit(j));
+			// Przeniesienie to wynik z dzielenia przez podstawe
+			carry = arrayOfDigits[iterLength] / 10;
+			// To co zostaje w komorce to reszta z dzielenia przez podstawe
+			arrayOfDigits[iterLength] = arrayOfDigits[iterLength] % 10;
+			// Przeniesienie dodajemy do wczesniejszej komorki
+			iterLength--;
+			arrayOfDigits[iterLength] += carry;
+		}
+		k++;
+		iterLength = numberLength - k;
+	}
+	// Usuwanie zer z konca i poczatku
+	arrayOfDigits = CutZerosRight(arrayOfDigits, numberLength, decimalMark);
+	arrayOfDigits = CutZerosLeft(arrayOfDigits, numberLength, decimalMark);
+	return LargeNumber(arrayOfDigits, numberLength, decimalMark, sign);
 }
 // Operacja dzielenia
 LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y)
@@ -336,20 +372,24 @@ LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y)
 // --------------------------------------------------
 LargeNumber operator+ (LargeNumber &x, LargeNumber &y)
 {
-
-	if ((x.GetSign() && y.GetSign()) || (!x.GetSign() && !y.GetSign()))
+	if (!(x.GetSign() ^ y.GetSign()))
 		return LargeNumber().Addition(x, y);
 	else
 		return LargeNumber().Subtraction(x, y);
 }
 LargeNumber operator- (LargeNumber &x, LargeNumber &y)
 {
-
 	if (x.GetSign() ^ y.GetSign())
 		return LargeNumber().Addition(x, y);
 	else
 		return LargeNumber().Subtraction(x, y);
-
-	return LargeNumber();
+}
+LargeNumber operator* (LargeNumber &x, LargeNumber &y)
+{
+		return LargeNumber().Multiplication(x, y);
+}
+LargeNumber operator/ (LargeNumber &x, LargeNumber &y)
+{
+		return LargeNumber().Division(x, y);
 }
 
