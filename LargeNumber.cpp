@@ -158,7 +158,7 @@ uint8_t* LargeNumber::CutZerosRight(uint8_t *x, unsigned int &length, const unsi
 		newArray[i] = x[i];
 	}
 	length = newLength;
-	delete x;
+	delete []x;
 	x = newArray;
 	return x;
 }
@@ -188,7 +188,7 @@ uint8_t* LargeNumber::CutZerosLeft(uint8_t *x, unsigned int &length, unsigned in
 		newArray[i] = x[i + cut];
 	}
 	length = length - cut;
-	delete x;
+	delete[] x;
 	x = newArray;
 	return x;
 }
@@ -248,18 +248,12 @@ LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 			arrayOfDigits[i] += y.Digit(y.GetDecimalMarkPosition() + rightBorder);
 		// Dodajemy ewentualne przeniesienie
 		arrayOfDigits[i] += carry;
-		// Zerujemy przeniesienie
-		carry = 0;
 		/*
 		Sprawdzamy czy wartosc jest wieksza od podstawy (domyslnie 10, przy innych trzeba stworzyc template i zastapic 10
 		Jesli tak, to ustawiamy przeniesienie
 		*/
-
-		if (arrayOfDigits[i] > 9)
-		{
-			arrayOfDigits[i] -= 10;
-			carry = 1;
-		}
+		carry = arrayOfDigits[i] / 10;
+		arrayOfDigits[i] = arrayOfDigits[i] % 10;
 	}
 	// Dodawanie liczb po przecinku
 	for (i = decimalMark - 1; i >= 0; i--)
@@ -276,17 +270,12 @@ LargeNumber LargeNumber::Addition(LargeNumber &x, LargeNumber &y)
 		}
 		// Dodajemy ewentualne przeniesienie
 		arrayOfDigits[i] += carry;
-		// Zerujemy przeniesienie
-		carry = 0;
 		/*
 		Sprawdzamy czy wartosc jest wieksza od podstawy (domyslnie 10, przy innych trzeba stworzyc template i zastapic 10
 		Jesli tak, to ustawiamy przeniesienie
 		*/
-		if (arrayOfDigits[i] > 9)
-		{
-			arrayOfDigits[i] -= 10;
-			carry = 1;
-		}
+		carry = arrayOfDigits[i] / 10;
+		arrayOfDigits[i] = arrayOfDigits[i] % 10;
 	}
 	// Dodajemy nowa cyfre na poczatku jesli mamy przeniesienie
 	uint8_t *newArrayOfDigits;	
@@ -322,7 +311,7 @@ LargeNumber LargeNumber::Subtraction(LargeNumber &x, LargeNumber &y)
 // Operacja mno¿enie
 LargeNumber LargeNumber::Multiplication(LargeNumber &x, LargeNumber &y)
 {
-	// inne zmienne
+	// dlugosc x i y
 	unsigned int xLen = x.GetNumberOfDigits();
 	unsigned int yLen = y.GetNumberOfDigits();
 	// Dlugosc jest maksymalna dlugoscia jaka moze powstac;
@@ -338,7 +327,7 @@ LargeNumber LargeNumber::Multiplication(LargeNumber &x, LargeNumber &y)
 	int i, j, k = 1;
 	// Iteracyjna zmienna dlugosci
 	unsigned int iterLength = numberLength - k;
-	unsigned int carry; 
+	uint8_t carry; 
 	// zerowanie liczb
 	for (i = 0; i < numberLength; i++)
 		arrayOfDigits[i] = 0;
