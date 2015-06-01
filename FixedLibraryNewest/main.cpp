@@ -29,9 +29,12 @@ int main()
 	LargeNumber number2("452145658435768756435466475745692342953678586554556786544354676543545678556544289501253864798756443543543663.23656756768783568456846634668765437653365");
 	LargeNumber number3("375325467543567895468456648368343456882368456283425683465342568349129126410736876788554345698763342573.23534317362734237946963163463433426702702126345");
 	LargeNumber number4;
+	LargeNumber bad1("54.92");
+	LargeNumber bad2("9.28");
 	LargeNumber l1("444.33");
 	LargeNumber l2("4.3333");
 	LargeNumber l3;
+	LargeNumber l4;
 	l3 = l1 * l2;
 	cout << l3.ToString() << endl;
 	string z = "223.34";
@@ -40,7 +43,9 @@ int main()
 	l1 = "1.0";
 	l2 = "-3";
 	l3 = number2 / number3;
-	cout << "Dzielenie: " << l3.ToString() << endl;
+	l4 = bad1 / bad2;
+	cout << "Dzielenie1: " << l3.ToString() << endl;
+	cout << "Dzielenie2: " << l4.ToString() << endl;
 	// MierzenieCzasu czas;
 	/*
 	string n1 = "", n2 = "";

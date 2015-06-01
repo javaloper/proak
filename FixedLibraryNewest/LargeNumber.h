@@ -20,7 +20,7 @@ private:
 	LargeNumber Addition(LargeNumber &x, LargeNumber &y);
 	LargeNumber Subtraction(LargeNumber &x, LargeNumber &y, bool isPositive = true); // trzeci opcjonalny parametr wskazuje, czy spodziewany jest dodatni wynik czy ujemny (gdy y > x)
 	LargeNumber Multiplication(LargeNumber &x, LargeNumber &y);
-	LargeNumber Division(LargeNumber &x, LargeNumber &y, unsigned int precision = 30);
+	LargeNumber Division(LargeNumber &x, LargeNumber &y, unsigned int precision = 50);
 	static int IsGreater(LargeNumber &x, LargeNumber &y); // funkcja pomocnicza sprawdzaj¹ca, czy liczba x jest wiêksza od y (zwraca dodatni¹) czy te¿ nie (0, gdy równe; ujemna gdy x mniejsze od y)
 	// Usuwanie niepotrzebnych zero powstalych po dzialaniach arytmetycznych
 	// Usuwanie zer z prawej strony przecinka

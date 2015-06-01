@@ -333,7 +333,7 @@ LargeNumber LargeNumber::Subtraction(LargeNumber &x, LargeNumber &y, bool isPosi
 		arrayOfDigits[i] -= borrow;
 		// jeli otrzymano ujemn¹ cyfrê na danej pozycji (licznik siê cofa, bo ka¿da cyfra jest liczb¹ unsigned
 		// (np. -1 to jest 255, -2, to 254, ... -9 to 247), to po¿yczka jest 1 z nastêpnej pozycji
-		borrow = arrayOfDigits[i] > 246 ? 1 : 0;
+		borrow = arrayOfDigits[i] >= 246 ? 1 : 0;
 		if (borrow == 1) // jeli uzyskano ujemn¹ liczbê na danej pozycji (borrow jest 1), to trzeba j¹ pomno¿yæ przez -1, aby mieæ dodatni¹ wartoæ
 			arrayOfDigits[i] += 10; // trzeba dodaæ przeniesienie z poprzedniej pozycji, aby uzyskaæ poprawn¹ cyfrê
 	}
@@ -351,7 +351,7 @@ LargeNumber LargeNumber::Subtraction(LargeNumber &x, LargeNumber &y, bool isPosi
 			arrayOfDigits[i] -= y.Digit(YLeftPart);
 		}
 		arrayOfDigits[i] -= borrow;
-		borrow = arrayOfDigits[i] > 246 ? 1 : 0;
+		borrow = arrayOfDigits[i] >= 246 ? 1 : 0;
 		if (borrow == 1)
 			arrayOfDigits[i] += 10;
 	}
@@ -430,7 +430,9 @@ LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y, unsigned int p
 		markPos += (XLen - YLen);
 	}
 	else
+	{
 		tempLength = XLen;
+	}
 	temp = new uint8_t[tempLength]; // tablica jest inicjalizowana d³ugoci¹ krótszej reprezentacji dzielnika (y)
 	for (int i = 0; i < tempLength; i++)
 		temp[i] = x.Digit(i);
@@ -440,7 +442,7 @@ LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y, unsigned int p
 	{
 		markPosCorrection += (dividend.numberOfDigits - dividend.decimalMarkPosition); // uwzglêdnienie poprawki
 		dividend.decimalMarkPosition = dividend.numberOfDigits; // przecinek przesuwany na koniec liczby
-		XCurrentPosition = dividend.decimalMarkPosition;
+		//XCurrentPosition = dividend.decimalMarkPosition;
 	}
 	if (divisor.decimalMarkPosition != divisor.numberOfDigits) // je¿eli istnieje przecinek, to przesuñ go na koniec (aby liczba by³a bez przecinka)
 	{
