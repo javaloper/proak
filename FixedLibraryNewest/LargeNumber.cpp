@@ -123,6 +123,11 @@ bool LargeNumber::GetSign()
 {
 	return isPositive;
 }
+
+void LargeNumber::SetDivisionPrecision(unsigned int newPrecision)
+{
+	this->precision = newPrecision;
+}
 uint8_t LargeNumber::Digit(unsigned int position)
 {
 	uint8_t res = digitsArray[position];
@@ -322,13 +327,13 @@ LargeNumber LargeNumber::Subtraction(LargeNumber &x, LargeNumber &y, bool isPosi
 	for (i = numberLength - 1; i >= decimalMark; i--)
 	{
 		--rightBorder;
-		uint8_t xDigit = x.Digit(x.GetDecimalMarkPosition() + rightBorder); // kolejna cyfra reprezentacji x
-		uint8_t yDigit = y.Digit(y.GetDecimalMarkPosition() + rightBorder); // kolejna cyfra reprezentacji y
+		uint8_t xDigit; //= x.Digit(x.GetDecimalMarkPosition() + rightBorder); // kolejna cyfra reprezentacji x
+		uint8_t yDigit; //= y.Digit(y.GetDecimalMarkPosition() + rightBorder); // kolejna cyfra reprezentacji y
 		// Sprawdzamy czy pozycja ktora chcemy odj¹æ istnieje
 		if (x.GetDecimalMarkPosition() + rightBorder < x.GetNumberOfDigits())
-			arrayOfDigits[i] += xDigit; // dodajemy cyfrê do pustej reprezentacji (odjemn¹)
+			arrayOfDigits[i] += x.Digit(x.GetDecimalMarkPosition() + rightBorder); //xDigit; // dodajemy cyfrê do pustej reprezentacji (odjemn¹)
 		if (y.GetDecimalMarkPosition() + rightBorder < y.GetNumberOfDigits())
-			arrayOfDigits[i] -= yDigit; // odejmujemy cyfrê odjemnika (jeli istnieje)
+			arrayOfDigits[i] -= y.Digit(y.GetDecimalMarkPosition() + rightBorder); // odejmujemy cyfrê odjemnika (jeli istnieje)
 		// Uwzglêdniamy ewentualn¹ po¿yczkê
 		arrayOfDigits[i] -= borrow;
 		// jeli otrzymano ujemn¹ cyfrê na danej pozycji (licznik siê cofa, bo ka¿da cyfra jest liczb¹ unsigned
@@ -356,6 +361,7 @@ LargeNumber LargeNumber::Subtraction(LargeNumber &x, LargeNumber &y, bool isPosi
 			arrayOfDigits[i] += 10;
 	}
 	arrayOfDigits = CutZerosLeft(arrayOfDigits, numberLength, decimalMark); // usuwa zbêdne zera z lewej
+	arrayOfDigits = CutZerosRight(arrayOfDigits, numberLength, decimalMark);
 	return LargeNumber(arrayOfDigits, numberLength, decimalMark, isPositive); // znak nowej liczby ustalany w wywo³aniu funkcji Subtraction
 }
 // Operacja mno¿enie
@@ -403,20 +409,24 @@ LargeNumber LargeNumber::Multiplication(LargeNumber &x, LargeNumber &y)
 	return LargeNumber(arrayOfDigits, numberLength, decimalMark, sign);
 }
 // Operacja dzielenia (precyzja domylna to 30 cyfr)
-LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y, unsigned int prec)
+LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y)
 {
 	int XLen = x.numberOfDigits; // d³ugoæ dzielnej
 	int YLen = y.numberOfDigits; // d³ugoæ dzielnika
 	int markPosCorrection = 0; // korekcja pozycja przecinka (domylnie 2, jeli obie liczby s¹ ca³kowite)
 	LargeNumber divisor(y.digitsArray, y.numberOfDigits, y.decimalMarkPosition); // zmienne lokalne, aby nie zmieniaæ zawartoci oryginalnych argumentów
 	LargeNumber dividend(x.digitsArray, x.numberOfDigits, x.decimalMarkPosition);
-	unsigned int precision = prec; // liczba cyfr reprezentacji
+	//unsigned int precision = prec; // liczba cyfr reprezentacji
+	unsigned int prec; // sluzy jako licznik generowania liczb wynikowych, przykazdej nowo stworzonej cyfrze dekrementowany
+	unsigned int resultPrecision; // precyzja wyniku okreslana na podstawie wiekszej precyzji sposrod obu liczb 
+	x.precision > y.precision ? prec = x.precision : prec = y.precision;
+	resultPrecision = prec;
 	int resultCurrentDigit = 0; // obecna cyfra wstawiana do reprezentacji wynikowej
 	int XCurrentPosition = 0; // pozycja obecnie przetwarzanej cyfry reprezentacji x
 	unsigned int markPos = 1;// XCurrentPosition;
 	// tablica wstawianych cyfr do wyniku:
 	uint8_t digits[] = { '0' - 48, '1' - 48, '2' - 48, '3' - 48, '4' - 48, '5' - 48, '6' - 48, '7' - 48, '8' - 48, '9' - 48 };
-	uint8_t *result = new uint8_t[precision];
+	uint8_t *result = new uint8_t[prec];
 	uint8_t *temp; // tablica tymczasowa na potrzeby inicjalizacji odpowiednio d³ugiej (dostosowanej do dzielnika) czêci dzielnej
 	unsigned int tempLength;
 	char nextDigit; // kolejna cyfra rezprezentacji x
@@ -463,7 +473,7 @@ LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y, unsigned int p
 		}
 		result[resultCurrentDigit] = digits[n]; // wstawia dan¹ cyfrê uint8_t do reprezentacji wynikowej
 		resultCurrentDigit++; // ustawienie na kolejn¹ cyfrê tablicy wynikowej
-		precision--; // zmniejszenie liczby cyfr do dodania
+		prec--; // zmniejszenie liczby cyfr do dodania
 		nextDigit = (char)(x.Digit(XCurrentPosition) + 48); // kolejna cyfra reprezentacji x do rozszerzenia obecnej reszty
 		if (XCurrentPosition >= x.numberOfDigits) // jeli reprezentacja x nie ma ju¿ wiêcej cyfr, to uzupe³niaj resztê R zerami:
 			nextDigit = '0';
@@ -471,17 +481,18 @@ LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y, unsigned int p
 			XCurrentPosition++; // kolejna (istniej¹ca) cyfra reprezentacji x
 		if (Xpart.ToString() == "0") // sprawdzenie, czy reszta == 0 i jeli tak, to ustawia precyzjê na obecn¹ pozycjê (wiêksza precyzja niepotrzebna) i koñczy dzielenie
 		{
-			prec = resultCurrentDigit;
+			//precision = resultCurrentDigit;
+			resultPrecision = resultCurrentDigit;
 			break;
 		}
 		string s = Xpart.ToString() + nextDigit; // ³añcuch z dotychczasow¹ reprezentacj¹ rozszerzony o kolejn¹ cyfrê
 		Xpart = LargeNumber(s); // rozszerzona reprezentacja reszty 
-	} while (precision > 0);
+	} while (prec > 0);
 
 	markPos = markPos - markPosCorrection; // korekta pozycji przecinka z uwzglêdnieniem rozszerzeñ dzielnika (y) i dzielnej (x)
-	result = CutZerosLeft(result, prec, markPos); // usuwa zbêdne zera z przodu
+	result = CutZerosLeft(result, resultPrecision, markPos); // usuwa zbêdne zera z przodu
 	bool sign = !(x.GetSign() ^ y.GetSign()); // znak dodatni, gdy obie reprezentacje tych samych znaków
-	return LargeNumber(result, prec, markPos, sign);
+	return LargeNumber(result, resultPrecision, markPos, sign);
 }
 // --------------------------------------------------
 LargeNumber operator+ (LargeNumber &x, LargeNumber &y)

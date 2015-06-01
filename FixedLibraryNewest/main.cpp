@@ -35,6 +35,7 @@ int main()
 	LargeNumber l2("4.3333");
 	LargeNumber l3;
 	LargeNumber l4;
+	LargeNumber l5;
 	l3 = l1 * l2;
 	cout << l3.ToString() << endl;
 	string z = "223.34";
@@ -43,9 +44,13 @@ int main()
 	l1 = "1.0";
 	l2 = "-3";
 	l3 = number2 / number3;
-	l4 = bad1 / bad2;
-	cout << "Dzielenie1: " << l3.ToString() << endl;
-	cout << "Dzielenie2: " << l4.ToString() << endl;
+	l4 = bad1 - number3;
+	
+	bad1.SetDivisionPrecision(150); // ustawienie precyzji dzielenia (precyzja jest ustalana na podstawie wiekszej precyzji)
+	l5 = bad1 / number3;
+	//cout << "Dzielenie1: " << l3.ToString() << endl;
+	cout << "Odejmowanie duzej od malej: " << l4.ToString() << endl;
+	cout << "Dzielenie malej przez duza: " << l5.ToString() << endl;
 	// MierzenieCzasu czas;
 	/*
 	string n1 = "", n2 = "";

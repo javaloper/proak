@@ -14,13 +14,14 @@ private:
 	unsigned int numberOfDigits; // liczba cyfr reprezentacji
 	unsigned int decimalMarkPosition; // pozycja przecinka w tablicy digitsArray
 	bool isPositive; // wskazuje, czy liczba jest dodatnia (true) czy ujemna (false)
+	unsigned int precision = 50; 
 	/*
 	Prywatne funkcje
 	*/
 	LargeNumber Addition(LargeNumber &x, LargeNumber &y);
 	LargeNumber Subtraction(LargeNumber &x, LargeNumber &y, bool isPositive = true); // trzeci opcjonalny parametr wskazuje, czy spodziewany jest dodatni wynik czy ujemny (gdy y > x)
 	LargeNumber Multiplication(LargeNumber &x, LargeNumber &y);
-	LargeNumber Division(LargeNumber &x, LargeNumber &y, unsigned int precision = 50);
+	LargeNumber Division(LargeNumber &x, LargeNumber &y);
 	static int IsGreater(LargeNumber &x, LargeNumber &y); // funkcja pomocnicza sprawdzaj¹ca, czy liczba x jest wiêksza od y (zwraca dodatni¹) czy te¿ nie (0, gdy równe; ujemna gdy x mniejsze od y)
 	// Usuwanie niepotrzebnych zero powstalych po dzialaniach arytmetycznych
 	// Usuwanie zer z prawej strony przecinka
@@ -49,6 +50,7 @@ public:
 	string ToString();
 	unsigned int GetDecimalMarkPosition();
 	unsigned int GetNumberOfDigits();
+	void SetDivisionPrecision(unsigned int precision);
 	bool GetSign();
 	uint8_t Digit(unsigned int position);
 	friend LargeNumber operator+ (LargeNumber &x, LargeNumber &y);
