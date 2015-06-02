@@ -327,8 +327,6 @@ LargeNumber LargeNumber::Subtraction(LargeNumber &x, LargeNumber &y, bool isPosi
 	for (i = numberLength - 1; i >= decimalMark; i--)
 	{
 		--rightBorder;
-		uint8_t xDigit; //= x.Digit(x.GetDecimalMarkPosition() + rightBorder); // kolejna cyfra reprezentacji x
-		uint8_t yDigit; //= y.Digit(y.GetDecimalMarkPosition() + rightBorder); // kolejna cyfra reprezentacji y
 		// Sprawdzamy czy pozycja ktora chcemy odj¹æ istnieje
 		if (x.GetDecimalMarkPosition() + rightBorder < x.GetNumberOfDigits())
 			arrayOfDigits[i] += x.Digit(x.GetDecimalMarkPosition() + rightBorder); //xDigit; // dodajemy cyfrê do pustej reprezentacji (odjemn¹)
@@ -416,7 +414,6 @@ LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y)
 	int markPosCorrection = 0; // korekcja pozycja przecinka (domylnie 2, jeli obie liczby s¹ ca³kowite)
 	LargeNumber divisor(y.digitsArray, y.numberOfDigits, y.decimalMarkPosition); // zmienne lokalne, aby nie zmieniaæ zawartoci oryginalnych argumentów
 	LargeNumber dividend(x.digitsArray, x.numberOfDigits, x.decimalMarkPosition);
-	//unsigned int precision = prec; // liczba cyfr reprezentacji
 	unsigned int prec; // sluzy jako licznik generowania liczb wynikowych, przykazdej nowo stworzonej cyfrze dekrementowany
 	unsigned int resultPrecision; // precyzja wyniku okreslana na podstawie wiekszej precyzji sposrod obu liczb 
 	x.precision > y.precision ? prec = x.precision : prec = y.precision;
@@ -467,9 +464,6 @@ LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y)
 			if (subtractionResult.GetSign() == false) // jesli odjecie dzielnika po raz kolejny daje wynik ujemny, to dzielnik sie juz nie miesci i nastepuje wyjscie z petli
 				break;
 			Xpart = subtractionResult;
-			//if (IsGreater(Xpart, divisor) < 0) // sprawdzenie, czy dzielnik zmieci siê jeszcze w obecnej reszcie (reprezentowanej tu przez Diff)
-			//	break;
-			//Xpart = Xpart - divisor; // jeli tak, to odejmij ponownie dzielknik od obecnej reszty (Diff)
 		}
 		result[resultCurrentDigit] = digits[n]; // wstawia dan¹ cyfrê uint8_t do reprezentacji wynikowej
 		resultCurrentDigit++; // ustawienie na kolejn¹ cyfrê tablicy wynikowej
@@ -481,7 +475,6 @@ LargeNumber LargeNumber::Division(LargeNumber &x, LargeNumber &y)
 			XCurrentPosition++; // kolejna (istniej¹ca) cyfra reprezentacji x
 		if (Xpart.ToString() == "0") // sprawdzenie, czy reszta == 0 i jeli tak, to ustawia precyzjê na obecn¹ pozycjê (wiêksza precyzja niepotrzebna) i koñczy dzielenie
 		{
-			//precision = resultCurrentDigit;
 			resultPrecision = resultCurrentDigit;
 			break;
 		}
